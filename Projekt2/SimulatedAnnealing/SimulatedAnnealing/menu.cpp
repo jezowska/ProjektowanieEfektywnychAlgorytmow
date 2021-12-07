@@ -9,6 +9,7 @@ Menu::Menu()
 	fileName = "";
 	isFileCorrectlyReaded = false;
 	int x = 0;
+	time = 0;
 	
 
 }
@@ -21,7 +22,8 @@ void Menu::displayMenu()
 		cout << "1. Wczytanie danych z pliku txt" << endl;
 		cout << "2. Stworzenie danych" << endl;
 		cout << "3. Wypisanie wczytanych danych" << endl;
-		cout << "4. Algorytm - Symulowane wyzarzanie" << endl;
+		cout << "4. Wybor ograniczenia czasowego [ms]" << endl;
+		cout << "5. Algorytm - Symulowane wyzarzanie" << endl;
 		cout << "6. Wyjscie" << endl;
 		cin >> choice;
 		switch (choice) {
@@ -63,13 +65,22 @@ void Menu::displayMenu()
 				break;
 			}
 			case 4:
+			{
+				cin >> time;
+				break;
+			}
+			case 5:
 			{	
 				if (cities.size() == numberOfCities)
 				{
-					SA sa(numberOfCities, cities);
-					sa.algorithm(numberOfCities*numberOfCities);
-					sa.printPath();
-					sa.printCost();
+					for (int i = 0; i < 50; i++)
+					{
+						SA sa(numberOfCities, cities);
+						sa.algorithm(time);
+						//sa.printPath();
+						sa.printCost();
+					}
+					
 				}
 				else 
 					cout << "Najpierw wczytaj dane!" << endl;
@@ -79,12 +90,13 @@ void Menu::displayMenu()
 				_getch();
 				break;
 			}
-			case 5:
+			case 6:
 			{
+				return;
 				_getch();
 				break;
 			}
-			case 6:
+			case 7:
 			{
 				system("cls");
 				break;

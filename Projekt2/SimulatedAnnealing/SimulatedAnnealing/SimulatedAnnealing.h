@@ -9,29 +9,31 @@
 #include <windows.h>
 #include <conio.h>
 
-
 using namespace std;
 
 class SA
 {
 public:
 	const double coolingRate = 0.99;
-	double temperature = 10000;
-	const double e = 2.718281828459;
+	double temperature = 500;
+	double prob;
 	int numberOfCities;
+	int iterations;
+	
+	int change;
 	long long int start, elapsed, frequency;
-	double elapsedSec;
+	long long int elapsedMs;
 	
 	int bestPathCost;
 	int currentCost;
-	vector<int> bestPath;
+	int nextPathCost;
+	int bestCost;
 	vector<int> currentPath;
+	vector<int> bestPath;
 	vector<vector<int>> cities;
 	
-
 	SA(int numberOfCities, vector<vector<int>> matrix);
-	void newPathSwap(vector<int>& path);
-	float randomFloat(int min, int max);
+	void swapCities(vector<int>& path);
 	vector<int> algorithm(int maxTime);
 	int calculatePathCost(vector<int> path);
 	double doubleRandom(double min, double max);
@@ -39,5 +41,4 @@ public:
 	void printPath();
 	void printCost();
 	long long int read_QPC();
-
 };

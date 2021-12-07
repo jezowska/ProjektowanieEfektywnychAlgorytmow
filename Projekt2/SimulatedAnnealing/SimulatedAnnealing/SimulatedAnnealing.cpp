@@ -1,5 +1,4 @@
 #include"SimulatedAnnealing.h"
-
 SA::SA(int numberOfCities, vector<vector<int>> matrix)
 {
 	cities.clear();
@@ -10,6 +9,12 @@ SA::SA(int numberOfCities, vector<vector<int>> matrix)
 	cities.resize(numberOfCities, vector<int>(numberOfCities));
 	currentPath.resize(numberOfCities);
 	currentCost = 0;
+	prob = 0.0;
+	iterations = numberOfCities * 10;
+	nextPathCost = 0;
+	
+	change = 0;
+	double prob = 0;
 
 	for (int i = 0; i < numberOfCities; i++)
 	{
@@ -26,12 +31,12 @@ SA::SA(int numberOfCities, vector<vector<int>> matrix)
 		
 		currentPath[i] = i;
 	}
-	elapsedSec = 1;
+	elapsedMs = 0;
 }
 
 void SA::printCost()
 {
-	cout << "Koszt: " << calculatePathCost(currentPath) << endl;
+	cout <</* "Koszt: " <<*/ calculatePathCost(currentPath) << endl;
 }
 
 void SA::printPath()
@@ -44,17 +49,17 @@ void SA::printPath()
 	cout << endl;
 }
 
-void SA::newPathSwap(vector<int>& path)
+void SA::swapCities(vector<int>& path)
 {
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_int_distribution<> dist(1, 10000);
 	//zapobiegamy zmianie miasta poczatkowego
-	int x = (rand() % (numberOfCities - 1)) + 1;
-	int y = (rand() % (numberOfCities - 1)) + 1;
+	int x = (gen() % (numberOfCities - 1)) + 1;
+	int y = (gen() % (numberOfCities - 1)) + 1;
 
 	while (x == y)
-		x = (rand() % (numberOfCities - 1)) + 1;
+		x = (gen() % (numberOfCities - 1)) + 1;
 
 	//zamiana miejscami
 	int tmp = path[x];
@@ -74,6 +79,7 @@ int SA::calculatePathCost(vector<int> path)
 {
 	int sum = 0;
 	int x = 0, y = 0;
+	
 	for (int i = 0; i < path.size() - 1; i++)
 	{
 		x = path[i];
@@ -89,54 +95,69 @@ int SA::calculatePathCost(vector<int> path)
 
 double SA::doubleRandom(double min, double max)
 {
-	double num = (double)rand() / RAND_MAX;
-	return min + num * (max - min);
+	return max + (rand() / (RAND_MAX / (min - max)));
 }
 
 void SA::randomPath(vector<int>& path)
 {
-	shuffle(path.begin()+1, path.end(), default_random_engine(0));
+	for (int i = 0; i < numberOfCities; i++)
+	{
+		swapCities(path);
+	}
+
+	//shuffle(path.begin()+1, path.end(), default_random_engine(0));
 }
 
 vector<int> SA::algorithm(int maxTime)
 {
+	if (maxTime == 0) maxTime = INT_MAX;
 	vector<int> nextPath(numberOfCities);
-	int iterations = numberOfCities*numberOfCities;
 
-	//randomPath(currentPath);
+	randomPath(currentPath);
 	currentCost = calculatePathCost(currentPath);
 
+	bestPath = currentPath;
+	bestCost = currentCost;
+
 	nextPath = currentPath;
-	int nextPathCost = calculatePathCost(nextPath);
+	elapsedMs = 1;
 
-	double prob = 0;
-
+	QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
 	start = read_QPC();
 
-	while(temperature > 0.0001)
+	while(temperature > 0.0001 && maxTime > elapsedMs)
 	{
-		//cout << "elapsedTime" << elapsedSec << endl;
-		//cout << "elapsed" << elapsed << endl;
+		temperature *= coolingRate;
 		for (int i = 0; i < iterations; i++)
 		{
-			newPathSwap(nextPath);
+			nextPath = currentPath;
+
+			swapCities(nextPath);
+
 			nextPathCost = calculatePathCost(nextPath);
 
-			prob = -((nextPathCost - currentCost) / temperature);
-			prob = (double)pow(e, prob);
+			change = nextPathCost - currentCost;
 
-			if((currentCost > nextPathCost) || (((double)rand() / (double)RAND_MAX) < prob))
+			prob =  (double)exp((-1.0) * ((double)change / (double)temperature));
+
+			if(change < 0)
 			{
-				
+				bestPath = nextPath;
+				bestPathCost = nextPathCost;
+				currentCost = nextPathCost;
+				currentPath = nextPath;
+			}
+			else if (doubleRandom(0, 1) < prob)
+			{
 				currentCost = nextPathCost;
 				currentPath = nextPath;
 			}
 		}
 		
-		temperature *= coolingRate;
-		//elapsed = read_QPC() - start;
-		//elapsedSec = (elapsedSec * 1000.0) / frequency;
+		elapsedMs = ((read_QPC() - start) * 1000.0) / frequency;
 	}
-	
+	currentPath = bestPath;
+	//cout << endl;
+	//cout /* << "Czas [ms]: "*/ << elapsedMs <<" " ;
 	return currentPath;
 }

@@ -17,6 +17,8 @@ public:
 	bool isFileCorrectlyReaded;
 	string fileName;
 	fstream we;
+	int time;
+
 	int x;
 	long long int frequency, start, elapsed;
 	
