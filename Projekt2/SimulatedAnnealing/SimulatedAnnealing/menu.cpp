@@ -10,7 +10,6 @@ Menu::Menu()
 	isFileCorrectlyReaded = false;
 	int x = 0;
 	time = 0;
-	
 
 }
 void Menu::displayMenu() 
@@ -19,19 +18,22 @@ void Menu::displayMenu()
 	while (x!=1)
 	{
 		system("cls");
+		data();
+
 		cout << "1. Wczytanie danych z pliku txt" << endl;
 		cout << "2. Stworzenie danych" << endl;
 		cout << "3. Wypisanie wczytanych danych" << endl;
-		cout << "4. Wybor ograniczenia czasowego [ms]" << endl;
-		cout << "5. Algorytm - Symulowane wyzarzanie" << endl;
-		cout << "6. Wyjscie" << endl;
+		cout << "4. Wybor kryterium stopu [s]" << endl;
+		cout << "5. Wybor temperatury poczatkowej" << endl;
+		cout << "6. Algorytm - Symulowane wyzarzanie" << endl;
+		cout << "7. Wyjscie" << endl;
 		cin >> choice;
 		switch (choice) {
 			case 1:
 			{
 				system("cls");
 				readFile();
-				if(cities.size() != numberOfCities) cout << "Niepoprawna nazwa pliku! Dane nie zostaly wczytane" << endl;
+				if(cities.size() != numberOfCities || numberOfCities <= 0) cout << "Dane nie zostaly wczytane" << endl;
 				else 
 					cout << "Dane wczytane." << endl;
 
@@ -45,7 +47,7 @@ void Menu::displayMenu()
 				cout << "Podaj ilosc miast: " << endl;
 				cin >> numberOfCities;
 				generateRandom(numberOfCities);
-				if (cities.size() == numberOfCities) cout << "Dane wczytane" << endl;
+				if (cities.size() == numberOfCities && numberOfCities > 0) cout << "Dane wczytane" << endl;
 				else 
 					cout << "Dane nie zostaly wczytane" << endl;
 
@@ -66,41 +68,41 @@ void Menu::displayMenu()
 			}
 			case 4:
 			{
+				cout << "Wpisz czas w sekundach: ";
 				cin >> time;
 				break;
 			}
 			case 5:
-			{	
-				if (cities.size() == numberOfCities)
-				{
-					for (int i = 0; i < 50; i++)
-					{
-						SA sa(numberOfCities, cities);
-						sa.algorithm(time);
-						//sa.printPath();
-						sa.printCost();
-					}
-					
-				}
-				else 
-					cout << "Najpierw wczytaj dane!" << endl;
-
-				
-				cout << "Nacisnij enter, aby kontynowac..." << endl;
-				_getch();
+			{
+				cout << "Wybierz temperature (wpisanie zera i wartosci mniejszych spowoduje przypisanie 1000): ";
+				cin >> temperature;
+				if (temperature <= 0) temperature = 1000;
 				break;
 			}
 			case 6:
-			{
-				return;
+			{	
+				if (cities.size() == numberOfCities || cities.size() != 0)
+				{	
+					SimulatedAnnealing sa(numberOfCities, cities);
+					sa.temperature = temperature;
+					sa.cities = cities;
+					sa.numberOfCities = numberOfCities;
+					sa.algorithm(time);
+				}
+				else 
+					cout << "Najpierw wczytaj dane!" << endl;
+				cout << endl;
+				cout << "Nacisnij enter, aby kontynowac..." << endl;
 				_getch();
 				break;
 			}
 			case 7:
 			{
-				system("cls");
+				return;
+				_getch();
 				break;
 			}
+
 			default:
 			{
 				cout << "Niepoprawny wybór. Nacisnij enter, aby wybrac ponownie." << endl;
@@ -110,17 +112,21 @@ void Menu::displayMenu()
 		}
 	}
 }
-void Menu::readFile()
+void Menu::readFile() //funkcja odpowiadajaca za wczytanie danych z pliku txt
 {
 	numberOfCities = 0;
 	cities.clear();
-	cout << "Podaj nazwê pliku txt (bez rozszerzenia): ";
+	cout << "Podaj nazwe pliku txt (bez rozszerzenia): ";
 	cin >> fileName;
 	ifstream we;
 	fileName.append(".txt");
 	we.open(fileName);
 	we >> numberOfCities;
-	cout << numberOfCities << endl;
+	if (numberOfCities == 0) //jesli plik zostal zle wczytany wypisujemy blad
+	{
+		cout << "Bledny plik. ";
+		return;
+	}
 	cities.resize(numberOfCities, vector<int>(numberOfCities));
 
 	for (unsigned int i = 0; i < cities.size(); i++)
@@ -133,7 +139,7 @@ void Menu::readFile()
 		}
 	}
 }
-void Menu::displayReadedData()
+void Menu::displayReadedData() //funkcja wyswietlajaca wczytane dane
 {
 	if (numberOfCities == 0)
 	{
@@ -149,8 +155,7 @@ void Menu::displayReadedData()
 		cout << endl;
 	}
 }
-
-void Menu::generateRandom(int size)
+void Menu::generateRandom(int size) //funkcja generujaca losowe dane do wektora o wybranym rozmiarze
 {
 	random_device rd;
 	mt19937 gen(rd());
@@ -173,6 +178,18 @@ void Menu::generateRandom(int size)
 			cities[i][j] = dist(gen);
 		}
 	}
+}
+void Menu::data() //funkcja wypisujaca aktualnie ustawione parametry
+{
+	cout << "Daria Jezowska 252731 \nPEA Projekt 2 \n";
+	if (numberOfCities > 0)
+		cout << "Aktualny plik: " << fileName << endl;
+	else
+		cout << "Brak wczytanego pliku" << endl;
+	cout << "Aktuanie ustawiona temperatura: " << temperature << endl;
+	cout << "Aktualnie ustawiony czas: ";
+	if (time == 0) cout << "brak ograniczenia czasowego\n" << endl;
+	else cout << time << "[s]\n" << endl;
 }
 Menu::~Menu()
 {

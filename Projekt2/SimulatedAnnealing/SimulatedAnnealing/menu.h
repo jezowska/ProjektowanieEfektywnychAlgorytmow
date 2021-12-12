@@ -18,6 +18,7 @@ public:
 	string fileName;
 	fstream we;
 	int time;
+	int temperature = 1000;
 
 	int x;
 	long long int frequency, start, elapsed;
@@ -33,6 +34,7 @@ public:
 	void readFile();
 	void displayReadedData();
 	void generateRandom(int size);
+	void data();
 	long long int read_QPC()
 	{
 		LARGE_INTEGER count;

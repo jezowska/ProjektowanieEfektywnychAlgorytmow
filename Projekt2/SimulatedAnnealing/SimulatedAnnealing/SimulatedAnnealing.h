@@ -11,30 +11,31 @@
 
 using namespace std;
 
-class SA
+class SimulatedAnnealing
 {
 public:
 	const double coolingRate = 0.99;
-	double temperature = 500;
+	double temperature = 1000;
 	double prob;
 	int numberOfCities;
 	int iterations;
 	
-	int change;
+	int delta;
 	long long int start, elapsed, frequency;
 	long long int elapsedMs;
-	
+	random_device rd;
+
 	int bestPathCost;
-	int currentCost;
+	int localBestPathCost;
 	int nextPathCost;
-	int bestCost;
-	vector<int> currentPath;
-	vector<int> bestPath;
+	int globalBestPathCost;
+	vector<int> localBestPath;
+	vector<int> globalBestPath;
 	vector<vector<int>> cities;
 	
-	SA(int numberOfCities, vector<vector<int>> matrix);
+	SimulatedAnnealing(int numberOfCities, vector<vector<int>> matrix);
 	void swapCities(vector<int>& path);
-	vector<int> algorithm(int maxTime);
+	void algorithm(int maxTime);
 	int calculatePathCost(vector<int> path);
 	double doubleRandom(double min, double max);
 	void randomPath(vector<int>& path);
